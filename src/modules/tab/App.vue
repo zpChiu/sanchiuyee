@@ -1,120 +1,107 @@
 <template>
-  <div id="app" :style="{'background-image': `url(${backgroundImageUrl})` }">
+  <div id="app">
     <router-view />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import settings from './js/settings.js'
 const dayjs = require('dayjs')
 const today = dayjs().format('YYYY-MM-DD')
 const localStorage = window.localStorage
-const imageCache = localStorage.getItem(today)
+const base64ImageCache = localStorage.getItem(today)
+const style = document.createElement('style')
+style.rel = 'stylesheet'
+document.getElementsByTagName('HEAD').item(0).appendChild(style)
+
 export default {
   name: 'App',
   data() {
     return {
-      backgroundImageUrl: require(`./backgrounds/${dayjs().format('DD')}.jpg`)
+      settings: settings,
+      wallpaper: require(`./backgrounds/default.jpg`),
+      color: 'blue'
+    }
+  },
+  watch: {
+    wallpaper: {
+      handler(newWallpaperUrl) {
+        style.innerText = `:root { --wallpaper: url('${this.wallpaper}') }`
+      },
+      immediate: true
     }
   },
   created() {
-    this.getStorageImage()
+    // 优先取存储在localStorage的base64图片
+    if (base64ImageCache !== null) {
+      this.wallpaper = base64ImageCache
+    } else {
+      this.getWallpaperWithUnsplash()
+    }
   },
   methods: {
-    HandleToError() {
-      this.backgroundImageUrl = require(`./backgrounds/${dayjs().format('DD')}.jpg`)
+    defaultWallpaper() {
+      this.wallpaper = require(`./backgrounds/default.jpg`)
     },
+    // 将图片内容转换成base64格式，并存储在localStorage
+    setBase64ImageCache(imageResponse) {
+      return new Promise((resolve, reject) => {
+        const blob = new Blob([imageResponse], { type: 'image/jpeg' })
+        const file = new FileReader()
+        file.readAsDataURL(blob)
+        file.onload = (e) => {
+          const base64Image = e.target.result
 
-    // 从localStorage获取背景图的缓存base64
-    getStorageImage() {
-      if (imageCache === null) {
-        this.getUnsplashImage().then(imgBase64 => {
           localStorage.clear()
+          localStorage.setItem(today, base64Image)
 
-          localStorage.setItem(today, imgBase64)
+          this.wallpaper = base64Image
 
-          this.backgroundImageUrl = imgBase64
-        })
-      } else {
-        this.backgroundImageUrl = imageCache
-      }
+          resolve()
+        }
+      })
     },
-
-    // 请求unsplash图片, 并转换成Blob, 在本地进行缓存
-    getUnsplashImage() {
+    // 获取壁纸图片, 图片来源 Unsplash
+    getWallpaperWithUnsplash() {
       return new Promise((resolve, reject) => {
         axios.get('https://source.unsplash.com/1920x1080/daily', {
           responseType: 'blob'
-        }).then((res) => {
-          const blob = new Blob([res.data], { type: 'image/jpeg' })
-          const file = new FileReader()
-          file.readAsDataURL(blob)
-          file.onload = (e) => {
-            resolve(e.target.result)
-          }
+        }).then(async res => {
+          await this.setBase64ImageCache(res.data)
+          resolve()
         }).catch((error) => {
-          console.log(error)
-          this.HandleToError()
+          console.log(`获取壁纸发生错误：${error.message}`)
+          this.defaultWallpaper()
         })
       })
     },
-
-    // 请求unsplash的新背景图片, 并转换成Blob, 在本地进行缓存
-    getUnsplashImageToReplace() {
+    // 获取新的壁纸图片, 图片来源 Unsplash
+    getNewWallpaperWithUnsplash() {
       return new Promise((resolve, reject) => {
         axios.get('https://source.unsplash.com/1920x1080/?view', {
           responseType: 'blob'
-        }).then((res) => {
-          const blob = new Blob([res.data], { type: 'image/jpeg' })
-          const file = new FileReader()
-          file.readAsDataURL(blob)
-          file.onload = (e) => {
-            localStorage.clear()
-
-            localStorage.setItem(today, e.target.result)
-
-            this.backgroundImageUrl = e.target.result
-
-            resolve()
-          }
+        }).then(async res => {
+          await this.setBase64ImageCache(res.data)
+          resolve()
         }).catch((error) => {
-          console.log(error)
-          this.HandleToError()
+          console.log(`获取新壁纸发生错误：${error.message}`)
+          this.defaultWallpaper()
         })
       })
     }
-
-    // checkingImageLoadState(imgUrl) {
-    //   const img = new Image()
-    //   img.src = imgUrl
-    //   document.body.style.opacity = 0
-    //   img.onload = () => {
-    //     this.backgroundImageUrl = imgUrl
-    //     document.body.style.opacity = 1
-    //   }
-    //   img.onerror = this.HandleToError
-    // },
-    // getImage2pexels() {
-    //   // https://www.pexels.com/ => https://api.pexels.com/v1/
-    //   axios.get('https://api.pexels.com/v1/')
-    //     .then(function(res) {
-    //       console.log(res)
-    //     }).catch(function(error) {
-    //       console.log(error)
-    //     })
-    // }
   }
 }
 </script>
 
 <style lang="less" src="./css/style.less"></style>
-<style lang="less" scoped>
+<style lang="less" vars="{ wallpaper }" scoped>
   #app {
     width: 100%;
     height: 100%;
     background-color: #fff;
     background-image: linear-gradient(to right, #fa709a 0%, #fee140 100%);
-    // background-image: url(./backgrounds/02.jpg);
+    background-image: var(--wallpaper);
     background-color: transparent;
     background-size: cover;
     background-position: center center;

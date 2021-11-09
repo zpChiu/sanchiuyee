@@ -117,10 +117,10 @@ export default {
           // 提交成功
         })
     },
-    // 更换新的背景图
+    // 更换新的壁纸
     handleReplaceBackgroundImage() {
       this.isDisabledIcon = true
-      this.$parent.getUnsplashImageToReplace().then(_ => {
+      this.$parent.getNewWallpaperWithUnsplash().then(_ => {
         this.isDisabledIcon = false
       })
     }
@@ -129,15 +129,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.sanchiuyee-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: red;
-  z-index: -1;
-}
 .sanchiuyee-tab-view {
   position: relative;
   display: flex;
@@ -235,5 +226,4 @@ export default {
   }
 
 }
-
 </style>
