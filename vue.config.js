@@ -1,3 +1,6 @@
+const path = require('path')
+const resolve = dir => path.join(__dirname, dir)
+
 module.exports = {
   publicPath: './',
   // 生产打包时不输出map文件，增加打包速度, 配合 new CompressionPlugin
@@ -31,5 +34,15 @@ module.exports = {
   assetsDir: 'static',
   css: {
     extract: false
+  },
+  configureWebpack: config => {
+    return {
+      resolve: {
+        extensions: ['.js', '.vue', '.json'],
+        alias: {
+          '@': resolve('src')
+        }
+      }
+    }
   }
 }

@@ -187,7 +187,7 @@ export default {
 
 <style scoped lang="less">
 .todo-popover-ani {
-  animation: showPopover .3s 1;
+  animation: showPopover .5s 1;
   animation-fill-mode : forwards;
 }
 @keyframes showPopover {

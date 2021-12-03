@@ -10,7 +10,7 @@
         <Daily ref="dailyRef" :visible="isVisibleDaily" :settings.sync="settings" />
       </div>
     </div>
-    <Time class="layout-tab_time" :current-user.sync="currentUser" />
+    <Time :class="['layout-tab_time',{'layout-tab_time_show':currentUser.userName}]" :current-user.sync="currentUser" />
     <div class="layout-tab_bottom">
       <div class="bottom-setting">
         <div class="setting-icon" @click.stop="isVisibleSetting = !isVisibleSetting">
@@ -41,11 +41,11 @@
 </template>
 
 <script>
-import Time from '../components/Time'
-import Daily from '../components/daily'
-import Todo from '../components/todo'
-import Setting from '../components/Setting'
-import settings from '../js/settings.js'
+import Time from '@/modules/tab/components/Time'
+import Daily from '@/modules/tab/components/Daily'
+import Todo from '@/modules/tab/components/Todo'
+import Setting from '@/modules/tab/components/Setting'
+import settings from '@/modules/tab/js/settings.js'
 export default {
   name: 'Home',
   components: {
@@ -67,8 +67,10 @@ export default {
   },
   watch: {
     settings: {
-      handler(newSetting) {
-        this.handleToSubmitSetting()
+      handler(newSetting, oldSetting) {
+        if (JSON.stringify(oldSetting) !== JSON.stringify(settings)) {
+          this.handleToSubmitUserInfo()
+        }
 
         // 取到数据库数据后, 即执行
         this.isVisibleTodo = newSetting.isVisibleTodo
@@ -83,18 +85,19 @@ export default {
       deep: true
     }
   },
+
   async created() {
     await this.getUserInfo()
   },
   methods: {
-    // 获取用户习惯, 包括用户名、习惯设置
+    // 获取用户信息数据( 用户名称、用户设置 )
     getUserInfo() {
       return this.$db.openCursor('userInfo', (item) => true)
         .then(res => {
           if (res.data && res.data.length >= 1) {
             this.currentUser = res.data[0]
           } else {
-            // 初始新增数据
+            // 初始时新增默认数据
             return this.$db.add('userInfo', {
               userName: '请输入您的名称',
               settings: this.settings
@@ -106,15 +109,15 @@ export default {
           }
         })
     },
-    // 提交修改后的用户习惯数据
-    handleToSubmitSetting() {
+    // 提交用户信息数据( 用户名称、用户设置 )
+    handleToSubmitUserInfo() {
       this.$db
         .update('userInfo', {
           userName: this.currentUser.userName,
-          settings: this.settings
+          settings: this.currentUser.settings
         }, this.currentUser.id)
         .then(res => {
-          // 提交成功
+          console.log('提交成功')
         })
     },
     // 更换新的壁纸
@@ -223,6 +226,11 @@ export default {
     flex-direction: column;
     justify-content: center;
     flex: 1 1 auto;
+    opacity: 0;
+    transition: opacity 0.3s;;
+  }
+  .layout-tab_time_show {
+    opacity: 1;
   }
 
 }

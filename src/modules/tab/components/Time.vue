@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import greetings from '../js/greetings'
+import greetings from '@/modules/tab/js/greetings'
 const dayjs = require('dayjs')
 export default {
   name: 'Time',

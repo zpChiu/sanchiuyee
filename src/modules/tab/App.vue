@@ -6,7 +6,7 @@
 
 <script>
 import axios from 'axios'
-import settings from './js/settings.js'
+import settings from '@/modules/tab/js/settings.js'
 const dayjs = require('dayjs')
 const today = dayjs().format('YYYY-MM-DD')
 const localStorage = window.localStorage

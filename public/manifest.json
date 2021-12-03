@@ -1,7 +1,7 @@
 {
     "name": "SanChiuYee",
-    "version": "0.0.1",
-    "description": "替换新的标签页，每天都更换不同的优质背景图，并添加日程安排、待办事项的功能。",
+    "version": "1.0.0",
+    "description": "替换新的标签页，每天都更换不同的优质背景图，并拥有下列功能：日程安排、待办事项。",
     "manifest_version": 2,
     "browser_action": {
         "default_title": "SanChiuYee",

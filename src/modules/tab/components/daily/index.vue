@@ -48,8 +48,8 @@
 </template>
 
 <script>
-import DailyForm from './DailyForm'
-import DailyList from './DailyList'
+import DailyForm from '@/modules/tab/components/Daily/DailyForm'
+import DailyList from '@/modules/tab/components/Daily/DailyList'
 const dayjs = require('dayjs')
 export default {
   name: 'Daily',
